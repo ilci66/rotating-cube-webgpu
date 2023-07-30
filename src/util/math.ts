@@ -1,5 +1,4 @@
 import { vec3, mat4 } from "wgpu-matrix";
-import { mat4 as glmat4, vec3 as glvec3 } from "gl-matrix";
 
 function getMvpMatrix(
   aspect: number,
