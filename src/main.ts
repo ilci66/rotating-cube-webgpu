@@ -187,19 +187,22 @@ async function run() {
   }
   frame();
 
+  // TOFIX: Resize method breaks app
   // re-configure context on resize
-  window.addEventListener("resize", () => {
-    size.width = canvas.width = canvas.clientWidth * devicePixelRatio;
-    size.height = canvas.height = canvas.clientHeight * devicePixelRatio;
-    // re-create depth texture
-    pipelineObj.depthTexture.destroy();
-    pipelineObj.depthTexture = device.createTexture({
-      size,
-      format: "depth24plus",
-      usage: GPUTextureUsage.RENDER_ATTACHMENT,
-    });
-    pipelineObj.depthView = pipelineObj.depthTexture.createView();
-    // update aspect, test how does this affect the actual code
-  });
+  // window.addEventListener("resize", () => {
+  //   size.width = canvas.width = canvas.clientWidth * devicePixelRatio;
+  //   size.height = canvas.height = canvas.clientHeight * devicePixelRatio;
+  //   // don't need to recall context.configure() after v104
+  //   // re-create depth texture
+  //   pipelineObj.depthTexture.destroy();
+  //   pipelineObj.depthTexture = device.createTexture({
+  //     size,
+  //     format: "depth24plus",
+  //     usage: GPUTextureUsage.RENDER_ATTACHMENT,
+  //   });
+  //   pipelineObj.depthView = pipelineObj.depthTexture.createView();
+  //   // update aspect
+  //   aspect = size.width / size.height;
+  // });
 }
 run();

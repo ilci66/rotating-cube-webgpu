@@ -1,4 +1,5 @@
 import { vec3, mat4 } from "wgpu-matrix";
+import { mat4 as glmat4, vec3 as glvec3 } from "gl-matrix";
 
 function getMvpMatrix(
   aspect: number,
@@ -6,13 +7,15 @@ function getMvpMatrix(
   rotation: { x: number; y: number; z: number },
   scale: { x: number; y: number; z: number }
 ) {
+  // get modelView Matrix
   const modelViewMatrix = getModelViewMatrix(position, rotation, scale);
+  // get projection Matrix
   const projectionMatrix = getProjectionMatrix(aspect);
-
+  // get mvp matrix
   const mvpMatrix = mat4.create();
+  mat4.multiply(projectionMatrix, modelViewMatrix, mvpMatrix);
 
-  mat4.multiply(mvpMatrix, projectionMatrix, modelViewMatrix);
-
+  // return matrix as Float32Array
   return mvpMatrix as Float32Array;
 }
 
@@ -21,23 +24,27 @@ function getModelViewMatrix(
   rotation = { x: 0, y: 0, z: 0 },
   scale = { x: 1, y: 1, z: 1 }
 ) {
-  const modelViewMatrix = mat4.create();
-
+  // get modelView Matrix
+  // identity instead of create
+  const modelViewMatrix = mat4.identity();
+  // translate position
   mat4.translate(
     modelViewMatrix,
+    vec3.fromValues(position.x, position.y, position.z),
+    modelViewMatrix
+  );
+  // rotate
+  mat4.rotateX(modelViewMatrix, rotation.x, modelViewMatrix);
+  mat4.rotateY(modelViewMatrix, rotation.y, modelViewMatrix);
+  mat4.rotateZ(modelViewMatrix, rotation.z, modelViewMatrix);
+  // scale
+  mat4.scale(
     modelViewMatrix,
-    vec3.fromValues(position.x, position.y, position.z)
+    vec3.fromValues(scale.x, scale.y, scale.z),
+    modelViewMatrix
   );
 
-  // This is the way it's done in gl-matrix library
-  // mat4.rotateX(modelViewMatrix,modelViewMatrix, rotation.x)
-
-  mat4.rotateX(modelViewMatrix, rotation.x);
-  mat4.rotateX(modelViewMatrix, rotation.x);
-  mat4.rotateX(modelViewMatrix, rotation.x);
-
-  mat4.scale(modelViewMatrix, vec3.fromValues(scale.x, scale.y, scale.z));
-
+  // return matrix as Float32Array
   return modelViewMatrix as Float32Array;
 }
 
@@ -52,16 +59,17 @@ function getProjectionMatrix(
   position = { x: 0, y: 0, z: 0 }
 ) {
   // create cameraview
-  const cameraView = mat4.create();
+  const cameraView = mat4.identity();
   const eye = vec3.fromValues(position.x, position.y, position.z);
+
   mat4.translate(cameraView, cameraView, eye);
   mat4.lookAt(cameraView, eye, center, up);
+  // get a perspective Matrix
+  const projectionMatrix = mat4.identity();
 
-  // get a perspective matrix
-  const projectionMatrix = mat4.create();
   mat4.perspective(fov, aspect, near, far, projectionMatrix);
   mat4.multiply(cameraView, projectionMatrix, projectionMatrix);
-
+  // return matrix as Float32Array
   return projectionMatrix as Float32Array;
 }
 
